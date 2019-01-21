@@ -23,10 +23,10 @@ using namespace std;
 
 void trim(string& s)
 {
-   size_t p = s.find_first_not_of(" \t");
+   size_t p = s.find_first_not_of(" \t\n");
    s.erase(0, p);
 
-   p = s.find_last_not_of(" \t");
+   p = s.find_last_not_of(" \t\n");
    if (string::npos != p)
       s.erase(p+1);
 }
@@ -46,8 +46,11 @@ int main(int argc, char *argv[]) {
         if (!dont_show_shell) {
             cout << "shell: ";
 	}
-	string input;
-	cin >> input;
+	char in [513];
+	//string input;
+	std::cin.getline (in, 512);
+	string input (in);
+	//cin >> input;
         trim (input);
         bool background_process = (input[input.length()-1] == '&');
 
@@ -56,10 +59,12 @@ int main(int argc, char *argv[]) {
 	    trim (input);
 	}
 
+	//cout << input;
         
         int pid = fork();
         
         if (pid == 0) {
+	    //cout << input;
             // I am the child
 	    //
 	    // First, handle pipes
@@ -146,17 +151,22 @@ int main(int argc, char *argv[]) {
 	    int count = 0;
 	    args[count] = pch;
 	    count ++;
-	    fprintf (stdin, args [count]);
+	    //fprintf (stdin, args [count]);
             while (pch != NULL) {
                 pch = strtok (NULL, " ");
 	        args[count] = pch;
-		fprintf (stdin, args[count]);
+		//fprintf (stdin, args[count]);
 	        count ++;	
 	    }
 	    args [count] = 0;
-
-	    execvp (args[0], args);
-	    
+            
+	    string changedir ("cd");
+	    if (changedir.compare (args[0]) == 0) {
+                chdir (args [1]);
+	    }
+            else {
+	        execvp (args[0], args);
+	    }
 	    perror ("ERROR");
 	    return 0; 
 	}
