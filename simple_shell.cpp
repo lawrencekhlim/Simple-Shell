@@ -54,139 +54,141 @@ int main(int argc, char *argv[]) {
             input.erase(input.length()-1);
 	    trim (input);
 	}
-        
-        size_t n2 = std::count(input.begin(), input.end(), ' ');             
-        char *args2[n2+2];
+        if (input.length() > 0) {
+            size_t n2 = std::count(input.begin(), input.end(), ' ');             
+            char *args2[n2+2];
 	    
-        char * inputarr2 = new char [input.length()+1];
-        std::strcpy (inputarr2, input.c_str());
+            char * inputarr2 = new char [input.length()+1];
+            std::strcpy (inputarr2, input.c_str());
 	
-	char *pch2 = strtok (inputarr2, " ");
-     	int count2 = 0;
-	args2[count2] = pch2;
-	count2 ++;
-        while (pch2 != NULL) {
-            pch2 = strtok (NULL, " ");
+	    char *pch2 = strtok (inputarr2, " ");
+     	    int count2 = 0;
 	    args2[count2] = pch2;
-	    count2 ++;	
-	}
-	args2 [count2] = 0;
+  	    count2 ++;
+            while (pch2 != NULL) {
+                pch2 = strtok (NULL, " ");
+	        args2[count2] = pch2;
+	        count2 ++;	
+   	    }
+	    args2 [count2] = 0;
             
-	string changedir2 ("cd");
-	if (changedir2.compare (args2[0]) == 0) {
-            int i = chdir (args2 [1]);
-	    if (i == -1) {
-                fprintf (stderr, "ERROR: No such directory\n");
-	    }
-	}  
-	else if (fork() == 0) {
-            // I am the child
-	    //
-	    // First, handle pipes
-	    int is_piped = -1;
-            std::size_t found;
-            do {
-	        found = input.find_last_of ("|");
-                if (found != string::npos) {
-                    int fd [2];
-		    pipe (&fd[0]);
+	    string changedir2 ("cd");
+	    if (changedir2.compare (args2[0]) == 0) {
+                int i = chdir (args2 [1]);
+	        if (i == -1) {
+                    fprintf (stderr, "ERROR: No such directory\n");
+	        }
+	    }  
+	    else if (fork() == 0) {
+                // I am the child
+	        //
+	        // First, handle pipes
+	        int is_piped = -1;
+                std::size_t found;
+                do {
+	            found = input.find_last_of ("|");
+                    if (found != string::npos) {
+                        int fd [2];
+		        pipe (&fd[0]);
 		    
-                    int pid2 = fork();
-		    if (pid2 == 0) {
-                        close (fd[0]);
-			close (STD_OUTPUT);
-			dup (fd[1]);
-			close (fd[1]);
-			input = input.substr(0, found);
-			is_piped = 0;
-		    }
-		    else {
-			close (fd[1]);
-			close (STD_INPUT);
-			dup (fd[0]);
-			close (fd[0]);
-                        input = input.substr(found+1);
-			is_piped = 1;
-		    }
-		    trim (input);
-		}
-	    } while (found != string::npos);
+                        int pid2 = fork();
+		        if (pid2 == 0) {
+                            close (fd[0]);
+			    close (STD_OUTPUT);
+			    dup (fd[1]);
+			    close (fd[1]);
+			    input = input.substr(0, found);
+		    	    is_piped = 0;
+		        }
+		        else {
+			    close (fd[1]);
+			    close (STD_INPUT);
+			    dup (fd[0]);
+			    close (fd[0]);
+                            input = input.substr(found+1);
+			    is_piped = 1;
+		        }
+		        trim (input);
+	    	    }
+	        } while (found != string::npos);
             
-	    // Then, handle redirections and files
-	    //
-            found = input.find (">");
-	    if (found != string::npos) {
-                if (is_piped == 0) {
-                    fprintf(stderr, "ERROR: Has both output redirect and pipe");
-		    return 0;
-		}
+	        // Then, handle redirections and files
+	        //
+                found = input.find (">");
+	        if (found != string::npos) {
+                    if (is_piped == 0) {
+                        fprintf(stderr, "ERROR: Has both output redirect and pipe");
+		        return 0;
+		    }
 
-                string output = input.substr (found+1);
-		trim (output);
+                    string output = input.substr (found+1);
+		    trim (output);
                 
-		int file_descripter = open (output.c_str(), O_WRONLY | O_CREAT);
-                close (STD_OUTPUT);
-		dup (file_descripter);
-		close (file_descripter);
+		    int file_descripter = open (output.c_str(), O_WRONLY | O_CREAT);
+                    close (STD_OUTPUT);
+		    dup (file_descripter);
+	    	    close (file_descripter);
 
-		input = input.substr (0, found);
-	        trim (input);	
-	    }
+		    input = input.substr (0, found);
+	            trim (input);	
+	        }
             
 
-	    found = input.find ("<");
-	    if (found != string::npos) {
-                if (is_piped == 1) {
-                    fprintf (stderr, "ERROR: Has both input redirect and pipe");
-		    return 0;
-		}
+	        found = input.find ("<");
+	        if (found != string::npos) {
+                    if (is_piped == 1) {
+                        fprintf (stderr, "ERROR: Has both input redirect and pipe");
+		        return 0;
+		    }
 
-                string input_file_name = input.substr (found+1);
-		trim (input_file_name);
+                    string input_file_name = input.substr (found+1);
+		    trim (input_file_name);
 
-		int file_descripter = open (input_file_name.c_str(), O_RDONLY);
-		perror ("ERROR");
-		close (STD_INPUT);
-		dup (file_descripter);
-		close (file_descripter);
+		    int file_descripter = open (input_file_name.c_str(), O_RDONLY);
+		    //perror ("ERROR");
+		    close (STD_INPUT);
+		    dup (file_descripter);
+   		    close (file_descripter);
 
-	        input = input.substr (0, found);
-		trim (input);
-	    }
+	            input = input.substr (0, found);
+		    trim (input);
+	        }
 
 
-	    // Finally execute the command
-            size_t n = std::count(input.begin(), input.end(), ' ');             
-            char *args[n+2];
+	        // Finally execute the command
+                size_t n = std::count(input.begin(), input.end(), ' ');             
+                char *args[n+2];
 	    
-            char * inputarr = new char [input.length()+1];
-            std::strcpy (inputarr, input.c_str());
-
-	    char *pch = strtok (inputarr, " ");
-	    int count = 0;
-	    args[count] = pch;
-	    count ++;
-            while (pch != NULL) {
-                pch = strtok (NULL, " ");
+                char * inputarr = new char [input.length()+1];
+                std::strcpy (inputarr, input.c_str());
+    
+	        char *pch = strtok (inputarr, " ");
+	        int count = 0;
 	        args[count] = pch;
-	        count ++;	
+	        count ++;
+                while (pch != NULL) {
+                    pch = strtok (NULL, " ");
+	            args[count] = pch;
+	            count ++;	
+	        }
+	        args [count] = 0;
+                
+	        execvp (args[0], args);
+	        perror ("ERROR");
+	        return 0; 
 	    }
-	    args [count] = 0;
-            
-	    execvp (args[0], args);
-	    perror ("ERROR");
-	    return 0; 
-	}
-	else {
-            // I am the parent
-	    if (!background_process) {
-                wait (NULL);
+    	    else {
+                // I am the parent
+	        if (!background_process) {
+                    wait (NULL);
+	        }
 	    }
+
 	}
 
         if (!dont_show_shell) {
            cout << "shell: ";
- 	}
+	}
     }
     return 0;
 }
