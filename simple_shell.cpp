@@ -40,13 +40,12 @@ int main(int argc, char *argv[]) {
     }
     
     signal(SIGCHLD, SIG_IGN);
-
-    while (1) {
-        if (!dont_show_shell) {
-            cout << "shell: ";
-	}
-	char in [513];
-	std::cin.getline (in, 512);
+   
+    if (!dont_show_shell) {
+        cout << "shell: ";
+    }
+    char in [513];
+    while (std::cin.getline (in, 512)) {
 	string input (in);
         trim (input);
         bool background_process = (input.length() > 0 && input[input.length()-1] == '&');
@@ -146,6 +145,7 @@ int main(int argc, char *argv[]) {
 		trim (input_file_name);
 
 		int file_descripter = open (input_file_name.c_str(), O_RDONLY);
+		perror ("ERROR");
 		close (STD_INPUT);
 		dup (file_descripter);
 		close (file_descripter);
@@ -183,6 +183,10 @@ int main(int argc, char *argv[]) {
                 wait (NULL);
 	    }
 	}
+
+        if (!dont_show_shell) {
+           cout << "shell: ";
+ 	}
     }
     return 0;
 }
