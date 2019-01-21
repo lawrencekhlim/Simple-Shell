@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	string input (in);
 	//cin >> input;
         trim (input);
-        bool background_process = (input[input.length()-1] == '&');
+        bool background_process = (input.length() > 0 && input[input.length()-1] == '&');
 
 	if (background_process) {
             input.erase(input.length()-1);
@@ -61,10 +61,31 @@ int main(int argc, char *argv[]) {
 
 	//cout << input;
         
-        int pid = fork();
-        
-        if (pid == 0) {
-	    //cout << input;
+        size_t n2 = std::count(input.begin(), input.end(), ' ');             
+        char *args2[n2+2];
+	    
+        char * inputarr2 = new char [input.length()+1];
+        std::strcpy (inputarr2, input.c_str());
+	
+	char *pch2 = strtok (inputarr2, " ");
+     	int count2 = 0;
+	args2[count2] = pch2;
+	count2 ++;
+        while (pch2 != NULL) {
+            pch2 = strtok (NULL, " ");
+	    args2[count2] = pch2;
+	    count2 ++;	
+	}
+	args2 [count2] = 0;
+            
+	string changedir2 ("cd");
+	if (changedir2.compare (args2[0]) == 0) {
+            int i = chdir (args2 [1]);
+	    if (i == -1) {
+                fprintf (stderr, "ERROR: No such directory\n");
+	    }
+	}  
+	else if (fork() == 0) {
             // I am the child
 	    //
 	    // First, handle pipes
@@ -140,7 +161,6 @@ int main(int argc, char *argv[]) {
 
 
 	    // Finally execute the command
-	    //fprintf (stdin, input);
             size_t n = std::count(input.begin(), input.end(), ' ');             
             char *args[n+2];
 	    
@@ -151,11 +171,9 @@ int main(int argc, char *argv[]) {
 	    int count = 0;
 	    args[count] = pch;
 	    count ++;
-	    //fprintf (stdin, args [count]);
             while (pch != NULL) {
                 pch = strtok (NULL, " ");
 	        args[count] = pch;
-		//fprintf (stdin, args[count]);
 	        count ++;	
 	    }
 	    args [count] = 0;
