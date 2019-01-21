@@ -13,7 +13,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <fcntl.h>    /* For O_RDWR */
+#include <fcntl.h>  
 
 #define STD_INPUT 0
 #define STD_OUTPUT 1
@@ -34,7 +34,6 @@ void trim(string& s)
 
 int main(int argc, char *argv[]) {
     bool dont_show_shell = 0;
-    //cout << argv[1];
     string flag ("-n");
     if (argc >= 2 && flag.compare (argv [1]) == 0) {
         dont_show_shell = 1;
@@ -47,10 +46,8 @@ int main(int argc, char *argv[]) {
             cout << "shell: ";
 	}
 	char in [513];
-	//string input;
 	std::cin.getline (in, 512);
 	string input (in);
-	//cin >> input;
         trim (input);
         bool background_process = (input.length() > 0 && input[input.length()-1] == '&');
 
@@ -58,8 +55,6 @@ int main(int argc, char *argv[]) {
             input.erase(input.length()-1);
 	    trim (input);
 	}
-
-	//cout << input;
         
         size_t n2 = std::count(input.begin(), input.end(), ' ');             
         char *args2[n2+2];
@@ -178,13 +173,7 @@ int main(int argc, char *argv[]) {
 	    }
 	    args [count] = 0;
             
-	    string changedir ("cd");
-	    if (changedir.compare (args[0]) == 0) {
-                chdir (args [1]);
-	    }
-            else {
-	        execvp (args[0], args);
-	    }
+	    execvp (args[0], args);
 	    perror ("ERROR");
 	    return 0; 
 	}
