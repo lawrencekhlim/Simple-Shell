@@ -160,6 +160,8 @@ int main(int argc, char *argv[]) {
                 
                 // Then, handle redirections and files
                 //
+                std::size_t found2;
+                
                 found = input.find (">");
                 if (found != string::npos) {
                     if (is_piped == 0) {
@@ -170,8 +172,8 @@ int main(int argc, char *argv[]) {
                     
                     string output = input.substr (found+1);
                     
-                    found = output.find (">");
-                    if (found != string::npos) {
+                    found2 = output.find (">");
+                    if (found2 != string::npos) {
                         fprintf (stderr, "Has multiple output redirect");
                         fflush (stderr);
                         return 1;
@@ -200,8 +202,8 @@ int main(int argc, char *argv[]) {
 
                     string input_file_name = input.substr (found+1);
                     
-                    found = input_file_name.find ("<");
-                    if (found != string::npos) {
+                    found2 = input_file_name.find ("<");
+                    if (found2 != string::npos) {
                         fprintf (stderr, "Has multiple input redirect");
                         fflush (stderr);
                         return 1;
