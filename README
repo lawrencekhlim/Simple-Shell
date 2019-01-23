@@ -1,0 +1,10 @@
+Lawrence Lim
+Perm 4560892
+
+Besides handling the special case of change directory (cd), I parsed the program in this priority:
+First handle &,
+then |,
+then > <,
+and finally exec the command.
+
+Using this order catches most cases we need to catch.
