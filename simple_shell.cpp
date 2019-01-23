@@ -36,14 +36,10 @@ void signal_handler (int signal) {
     int status;
     wait (&status);
     int i = WEXITSTATUS (status);
-    //cout << "HERE2 \n" << i  << "\n";
     if (WIFEXITED (status) && WEXITSTATUS (status) != 0) {
-        //fprintf (stderr, "ERROR2: %d", WEXITSTATUS (status));
         char buf [512];
         ssize_t i = read (::error_fd, buf, 512);
-        //fprintf (stderr, "%ld", i);
         if (i > 0) {
-            
             string msg (buf);
             msg = msg.substr (0, i);
             replace (msg.begin(), msg.end(), '\n', ' ');
@@ -57,7 +53,6 @@ void signal_handler2 (int signal) {
     int status;
     wait (&status);
     int i = WEXITSTATUS (status);
-    //cout << "HERE3 \n" << i  << "\n";
     exit (i);
 }
 
@@ -149,7 +144,6 @@ int main(int argc, char *argv[]) {
                             int status;
                             wait (&status);
                             
-                            //cout << "HERE2\n";
                             if (WIFEXITED (status) && WEXITSTATUS (status) != 0) {
                                 return 1;
                             }
@@ -212,7 +206,7 @@ int main(int argc, char *argv[]) {
                     trim (input_file_name);
                     
                     int file_descripter = open (input_file_name.c_str(), O_RDONLY);
-                    //perror ("ERROR");
+
                     close (STD_INPUT);
                     dup (file_descripter);
                     close (file_descripter);
@@ -252,10 +246,7 @@ int main(int argc, char *argv[]) {
                     int status;
                     wait (&status);
                     int i = WEXITSTATUS (status);
-                    //cout << "HERE1 \n";
-                    //cout << i  << "\n";
                     if (WIFEXITED (status) && WEXITSTATUS (status) != 0) {
-                        //fprintf (stderr, "ERROR1: %d", WEXITSTATUS (status));
                         char buf [512];
                         ssize_t i = read (::error_fd, buf, 512);
                         if (i > 0) {
